@@ -93,13 +93,17 @@
 
     function dropChip(e) {
       const board = document.querySelector(".board-container");
+      const boardRect = board.getBoundingClientRect();
+      if (e.clientY - boardRect.top > 100) return;  // Only top 100px valid
+
+      const board = document.querySelector(".board-container");
       const chip = document.getElementById("chip");
       const sound = document.getElementById("plinkSound");
 
       let boardRect = board.getBoundingClientRect();
       let x = e.clientX - boardRect.left - 20;
       x = Math.max(20, Math.min(x, 340));
-      let y = 110;
+      let y = 140;
 
       chip.style.left = x + "px";
       chip.style.top = y + "px";
