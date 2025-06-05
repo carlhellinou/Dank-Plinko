@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>DankPlinko 🌿</title>
+  <title>DankPlinko 🌿 Smokeout Edition</title>
   <style>
     body {
       background: #121212;
@@ -16,6 +16,7 @@
       width: 400px;
       height: 600px;
       margin: 0 auto;
+      cursor: crosshair;
     }
     .board-image {
       width: 100%;
@@ -26,6 +27,21 @@
       top: 110px;
       left: 180px;
       z-index: 10;
+    }
+    .smoke {
+      width: 15px;
+      height: 15px;
+      position: absolute;
+      background: radial-gradient(circle, rgba(170,255,170,0.6) 0%, rgba(0,0,0,0) 70%);
+      border-radius: 50%;
+      animation: fade 1s ease-out forwards;
+      z-index: 5;
+    }
+    @keyframes fade {
+      to {
+        opacity: 0;
+        transform: scale(1.8);
+      }
     }
     .prize-row {
       display: flex;
@@ -49,10 +65,10 @@
   </style>
 </head>
 <body>
-  <h1>🌿 The Price is Dank! – Plinko Edition 🎯</h1>
-  <button onclick="dropChip()">Drop Chip</button>
-  <div class="board-container">
-    <img src="Dank plinko board.png" class="board-image">
+  <h1>🌿 The Price is Dank! – Smokeout Edition 🎯</h1>
+  <p>Click anywhere on the board to drop a chip!</p>
+  <div class="board-container" onclick="dropChip(event)">
+    <img src="Dank plinko board with background.png" class="board-image">
     <img src="dankplinkochip.png" class="chip" id="chip">
   </div>
 
@@ -65,7 +81,7 @@
   </div>
 
   <div id="result"></div>
-  <audio id="plinkSound" src="plink.mp3" preload="auto"></audio>
+  <audio id="plinkSound" src="weed-sizzle.mp3" preload="auto"></audio>
   <script>
     const prizes = [
       "💰 10M GP",
@@ -75,22 +91,35 @@
       "💰 10M GP"
     ];
 
-    function dropChip() {
+    function dropChip(e) {
+      const board = document.querySelector(".board-container");
       const chip = document.getElementById("chip");
       const sound = document.getElementById("plinkSound");
-      let x = 180;
+
+      let boardRect = board.getBoundingClientRect();
+      let x = e.clientX - boardRect.left - 20;
+      x = Math.max(20, Math.min(x, 340));
       let y = 110;
+
       chip.style.left = x + "px";
       chip.style.top = y + "px";
 
       const steps = 8;
       let count = 0;
+
       const interval = setInterval(() => {
         if (count >= steps) {
           clearInterval(interval);
           const slotIndex = Math.floor((x - 20) / 80);
           document.getElementById("result").innerHTML = `🎉 You landed on: <b>${prizes[slotIndex]}</b>`;
         } else {
+          const smoke = document.createElement("div");
+          smoke.classList.add("smoke");
+          smoke.style.left = (x + 10) + "px";
+          smoke.style.top = (y + 10) + "px";
+          board.appendChild(smoke);
+          setTimeout(() => smoke.remove(), 1000);
+
           const move = Math.random() < 0.5 ? -1 : 1;
           x += move * 20;
           x = Math.max(20, Math.min(x, 340));
