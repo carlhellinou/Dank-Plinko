@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>DankPlinko 🌿 Ultimate Fix</title>
+  <title>DankPlinko 🌿 Perfected Edition</title>
   <style>
     body {
       background: #121212;
@@ -24,10 +24,10 @@
     .chip {
       width: 40px;
       position: absolute;
-      top: 100px;
+      top: 140px;
       left: 180px;
       z-index: 10;
-      transition: top 0.2s ease, left 0.2s ease;
+      transition: top 0.3s ease, left 0.3s ease;
     }
     .smoke {
       width: 15px;
@@ -35,13 +35,13 @@
       position: absolute;
       background: radial-gradient(circle, rgba(170,255,170,0.6) 0%, rgba(0,0,0,0) 70%);
       border-radius: 50%;
-      animation: fade 1s ease-out forwards;
+      animation: fade 1.2s ease-out forwards;
       z-index: 5;
     }
     @keyframes fade {
       to {
         opacity: 0;
-        transform: scale(1.8);
+        transform: scale(2);
       }
     }
     .prize-row {
@@ -61,8 +61,8 @@
   </style>
 </head>
 <body>
-  <h1>🌿 The Price is Dank! – Ultimate Fix Edition 🎯</h1>
-  <p>Click near the top of the board (green zone) to drop your chip!</p>
+  <h1>🌿 The Price is Dank! – Perfected Edition 🎯</h1>
+  <p>Click inside the green zone at the top to drop a chip!</p>
   <div class="board-container" id="board">
     <img src="Dank plinko board with background.png" class="board-image">
     <img src="dankplinkochip.png" class="chip" id="chip">
@@ -93,22 +93,24 @@
     board.addEventListener("click", function(e) {
       const boardRect = board.getBoundingClientRect();
       const yClick = e.clientY - boardRect.top;
-      if (yClick > 100) return;
+      const xClick = e.clientX - boardRect.left;
 
-      let x = e.clientX - boardRect.left - 20;
-      x = Math.max(20, Math.min(x, 340));
-      let y = 100;
+      // Only allow click in upper middle area
+      if (yClick > 100 || xClick < 40 || xClick > 360) return;
+
+      let x = xClick - 20;
+      let y = 140;
 
       chip.style.left = x + "px";
       chip.style.top = y + "px";
 
-      let steps = 8;
+      let steps = 10; // slower and more realistic
       let count = 0;
 
       const interval = setInterval(() => {
         if (count >= steps) {
           clearInterval(interval);
-          const slotIndex = Math.floor((x - 20) / 80);
+          const slotIndex = Math.min(4, Math.floor((x - 20) / 72)); // 5 slots logic
           document.getElementById("result").innerHTML = `🎉 You landed on: <b>${prizes[slotIndex]}</b>`;
         } else {
           const smoke = document.createElement("div");
@@ -116,18 +118,18 @@
           smoke.style.left = (x + 10) + "px";
           smoke.style.top = (y + 10) + "px";
           board.appendChild(smoke);
-          setTimeout(() => smoke.remove(), 1000);
+          setTimeout(() => smoke.remove(), 1200);
 
           const move = Math.random() < 0.5 ? -1 : 1;
-          x += move * 20;
+          x += move * 16;
           x = Math.max(20, Math.min(x, 340));
-          y += 40;
+          y += 36;
           chip.style.left = x + "px";
           chip.style.top = y + "px";
           sound.play();
           count++;
         }
-      }, 250);
+      }, 300);
     });
   </script>
 </body>
