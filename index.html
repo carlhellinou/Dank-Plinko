@@ -14,6 +14,7 @@
     .board-container {
       position: relative;
       width: 400px;
+      height: 600px;
       margin: 0 auto;
     }
     .board-image {
@@ -22,13 +23,19 @@
     .chip {
       width: 40px;
       position: absolute;
-      top: 40px;
+      top: 110px;
       left: 180px;
       z-index: 10;
     }
-    .slot-img {
+    .prize-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px auto 30px;
+      width: 400px;
+    }
+    .prize-slot {
       width: 60px;
-      margin: 10px;
+      height: 60px;
     }
     button {
       padding: 10px 20px;
@@ -48,6 +55,15 @@
     <img src="Dank plinko board.png" class="board-image">
     <img src="dankplinkochip.png" class="chip" id="chip">
   </div>
+
+  <div class="prize-row">
+    <img src="10m gp icon.png" class="prize-slot">
+    <img src="burned icon.png" class="prize-slot">
+    <img src="50m gp icon.png" class="prize-slot">
+    <img src="burned icon.png" class="prize-slot">
+    <img src="10m gp icon.png" class="prize-slot">
+  </div>
+
   <div id="result"></div>
   <audio id="plinkSound" src="plink.mp3" preload="auto"></audio>
   <script>
@@ -63,11 +79,11 @@
       const chip = document.getElementById("chip");
       const sound = document.getElementById("plinkSound");
       let x = 180;
-      let y = 40;
+      let y = 110;
       chip.style.left = x + "px";
       chip.style.top = y + "px";
 
-      const steps = 6;
+      const steps = 8;
       let count = 0;
       const interval = setInterval(() => {
         if (count >= steps) {
@@ -78,7 +94,7 @@
           const move = Math.random() < 0.5 ? -1 : 1;
           x += move * 20;
           x = Math.max(20, Math.min(x, 340));
-          y += 35;
+          y += 40;
           chip.style.left = x + "px";
           chip.style.top = y + "px";
           sound.play();
