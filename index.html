@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>DankPlinko 🌿 Smokeout Edition</title>
+  <title>DankPlinko 🌿 Final Fix</title>
   <style>
     body {
       background: #121212;
@@ -24,7 +24,7 @@
     .chip {
       width: 40px;
       position: absolute;
-      top: 110px;
+      top: 140px;
       left: 180px;
       z-index: 10;
     }
@@ -65,9 +65,9 @@
   </style>
 </head>
 <body>
-  <h1>🌿 The Price is Dank! – Smokeout Edition 🎯</h1>
-  <p>Click anywhere on the board to drop a chip!</p>
-  <div class="board-container" onclick="dropChip(event)">
+  <h1>🌿 The Price is Dank! – Final Fix Edition 🎯</h1>
+  <p>Click near the top of the board to drop your chip!</p>
+  <div class="board-container" id="board">
     <img src="Dank plinko board with background.png" class="board-image">
     <img src="dankplinkochip.png" class="chip" id="chip">
   </div>
@@ -81,7 +81,7 @@
   </div>
 
   <div id="result"></div>
-  <audio id="plinkSound" src="weed-sizzle.mp3" preload="auto"></audio>
+  <audio id="plinkSound" src="lighter-flick.mp3" preload="auto"></audio>
   <script>
     const prizes = [
       "💰 10M GP",
@@ -91,16 +91,15 @@
       "💰 10M GP"
     ];
 
-    function dropChip(e) {
-      const board = document.querySelector(".board-container");
-      const boardRect = board.getBoundingClientRect();
-      if (e.clientY - boardRect.top > 100) return;  // Only top 100px valid
-
-      const board = document.querySelector(".board-container");
+    document.getElementById("board").addEventListener("click", function(e) {
+      const board = e.currentTarget;
       const chip = document.getElementById("chip");
       const sound = document.getElementById("plinkSound");
 
       let boardRect = board.getBoundingClientRect();
+      const yClick = e.clientY - boardRect.top;
+      if (yClick > 100) return; // Only allow clicks in top 100px
+
       let x = e.clientX - boardRect.left - 20;
       x = Math.max(20, Math.min(x, 340));
       let y = 140;
@@ -134,7 +133,7 @@
           count++;
         }
       }, 250);
-    }
+    });
   </script>
 </body>
 </html>
