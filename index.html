@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>DankPlinko 🌿 Final Fix</title>
+  <title>DankPlinko 🌿 Ultimate Fix</title>
   <style>
     body {
       background: #121212;
@@ -24,9 +24,10 @@
     .chip {
       width: 40px;
       position: absolute;
-      top: 140px;
+      top: 100px;
       left: 180px;
       z-index: 10;
+      transition: top 0.2s ease, left 0.2s ease;
     }
     .smoke {
       width: 15px;
@@ -53,20 +54,15 @@
       width: 60px;
       height: 60px;
     }
-    button {
-      padding: 10px 20px;
-      font-size: 18px;
-      background: #22aa22;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      margin-bottom: 10px;
+    #result {
+      font-size: 1.2em;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>🌿 The Price is Dank! – Final Fix Edition 🎯</h1>
-  <p>Click near the top of the board to drop your chip!</p>
+  <h1>🌿 The Price is Dank! – Ultimate Fix Edition 🎯</h1>
+  <p>Click near the top of the board (green zone) to drop your chip!</p>
   <div class="board-container" id="board">
     <img src="Dank plinko board with background.png" class="board-image">
     <img src="dankplinkochip.png" class="chip" id="chip">
@@ -83,6 +79,9 @@
   <div id="result"></div>
   <audio id="plinkSound" src="lighter-flick.mp3" preload="auto"></audio>
   <script>
+    const board = document.getElementById("board");
+    const chip = document.getElementById("chip");
+    const sound = document.getElementById("plinkSound");
     const prizes = [
       "💰 10M GP",
       "🔥 Burned Chip",
@@ -91,23 +90,19 @@
       "💰 10M GP"
     ];
 
-    document.getElementById("board").addEventListener("click", function(e) {
-      const board = e.currentTarget;
-      const chip = document.getElementById("chip");
-      const sound = document.getElementById("plinkSound");
-
-      let boardRect = board.getBoundingClientRect();
+    board.addEventListener("click", function(e) {
+      const boardRect = board.getBoundingClientRect();
       const yClick = e.clientY - boardRect.top;
-      if (yClick > 100) return; // Only allow clicks in top 100px
+      if (yClick > 100) return;
 
       let x = e.clientX - boardRect.left - 20;
       x = Math.max(20, Math.min(x, 340));
-      let y = 140;
+      let y = 100;
 
       chip.style.left = x + "px";
       chip.style.top = y + "px";
 
-      const steps = 8;
+      let steps = 8;
       let count = 0;
 
       const interval = setInterval(() => {
