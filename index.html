@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DankPlinko 🌿</title>
+  <style>
+    body {
+      background: #121212;
+      color: #aaffaa;
+      font-family: 'Comic Sans MS', cursive;
+      text-align: center;
+    }
+    .board-container {
+      position: relative;
+      width: 400px;
+      margin: 0 auto;
+    }
+    .board-image {
+      width: 100%;
+    }
+    .chip {
+      width: 40px;
+      position: absolute;
+      top: 40px;
+      left: 180px;
+      z-index: 10;
+    }
+    .slot-img {
+      width: 60px;
+      margin: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background: #22aa22;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌿 The Price is Dank! – Plinko Edition 🎯</h1>
+  <button onclick="dropChip()">Drop Chip</button>
+  <div class="board-container">
+    <img src="Dank plinko board.png" class="board-image">
+    <img src="dankplinkochip.png" class="chip" id="chip">
+  </div>
+  <div id="result"></div>
+  <audio id="plinkSound" src="plink.mp3" preload="auto"></audio>
+  <script>
+    const prizes = [
+      "💰 10M GP",
+      "🔥 Burned Chip",
+      "💰 50M GP",
+      "🔥 Burned Chip",
+      "💰 10M GP"
+    ];
+
+    function dropChip() {
+      const chip = document.getElementById("chip");
+      const sound = document.getElementById("plinkSound");
+      let x = 180;
+      let y = 40;
+      chip.style.left = x + "px";
+      chip.style.top = y + "px";
+
+      const steps = 6;
+      let count = 0;
+      const interval = setInterval(() => {
+        if (count >= steps) {
+          clearInterval(interval);
+          const slotIndex = Math.floor((x - 20) / 80);
+          document.getElementById("result").innerHTML = `🎉 You landed on: <b>${prizes[slotIndex]}</b>`;
+        } else {
+          const move = Math.random() < 0.5 ? -1 : 1;
+          x += move * 20;
+          x = Math.max(20, Math.min(x, 340));
+          y += 35;
+          chip.style.left = x + "px";
+          chip.style.top = y + "px";
+          sound.play();
+          count++;
+        }
+      }, 250);
+    }
+  </script>
+</body>
+</html>
