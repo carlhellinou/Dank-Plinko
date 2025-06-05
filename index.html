@@ -96,10 +96,10 @@
       const xClick = e.clientX - boardRect.left;
 
       // Only allow click in upper middle area
-      if (yClick > 100 || xClick < 40 || xClick > 360) return;
+      if (yClick > 100 || xClick < 60 || xClick > 340) return;
 
       let x = xClick - 20;
-      let y = 140;
+      let y = 160;
 
       chip.style.left = x + "px";
       chip.style.top = y + "px";
@@ -123,7 +123,7 @@
           const move = Math.random() < 0.5 ? -1 : 1;
           x += move * 16;
           x = Math.max(20, Math.min(x, 340));
-          y += 36;
+          y += 32;
           chip.style.left = x + "px";
           chip.style.top = y + "px";
           sound.play();
