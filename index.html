@@ -35,7 +35,7 @@
     <p>Total GP: <span id="score">0</span></p>
   </div>
   <canvas id="gameCanvas" width="800" height="600"></canvas>
-  <audio autoplay loop>
+  <audio id="bgMusic" loop>
     <source src="High_Empire_compressed.mp3" type="audio/mpeg">
     Your browser does not support the audio tag.
   </audio>
@@ -44,18 +44,56 @@
     const ctx = canvas.getContext("2d");
     const chipImg = new Image();
     chipImg.src = "dankplinkochip.png";
+    const bgMusic = document.getElementById("bgMusic");
 
     let chipX = canvas.width / 2, chipY = 0;
     let vX = 0, vY = 0, gravity = 0.5, bounce = 0.6;
     let drops = 3, score = 0, dropped = false;
+    let pegs = [];
 
     const dropsLeftDisplay = document.getElementById("dropsLeft");
     const scoreDisplay = document.getElementById("score");
 
+    function createPegs() {
+      const spacingX = 80;
+      const spacingY = 60;
+      for (let row = 0; row < 6; row++) {
+        for (let col = 0; col < 8; col++) {
+          let x = 100 + col * spacingX + (row % 2 === 0 ? 0 : spacingX / 2);
+          let y = 100 + row * spacingY;
+          pegs.push({ x, y, radius: 8 });
+        }
+      }
+    }
+
+    function drawPegs() {
+      ctx.fillStyle = "rgba(0,255,0,0.2)";
+      for (let peg of pegs) {
+        ctx.beginPath();
+        ctx.arc(peg.x, peg.y, peg.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function handleCollisions() {
+      for (let peg of pegs) {
+        let dx = chipX + 20 - peg.x;
+        let dy = chipY + 20 - peg.y;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < peg.radius + 20) {
+          let angle = Math.atan2(dy, dx);
+          let pushX = Math.cos(angle) * 2;
+          let pushY = Math.sin(angle) * 2;
+          vX += pushX;
+          vY += pushY;
+        }
+      }
+    }
+
     function resetChip(x) {
       chipX = x - canvas.offsetLeft - 20;
       chipY = 0;
-      vX = (Math.random() - 0.5) * 4;
+      vX = (Math.random() - 0.5) * 2;
       vY = 0;
       dropped = true;
     }
@@ -66,10 +104,11 @@
       chipY += vY;
       chipX += vX;
 
+      handleCollisions();
+
       if (chipY + 40 > canvas.height) {
         chipY = canvas.height - 40;
         vY *= -bounce;
-
         dropped = false;
         evaluatePrize(chipX);
       }
@@ -80,6 +119,7 @@
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawPegs();
       ctx.drawImage(chipImg, chipX, chipY, 40, 40);
     }
 
@@ -113,9 +153,13 @@
     }
 
     canvas.addEventListener("click", (e) => {
-      if (drops > 0 && !dropped) resetChip(e.clientX);
+      if (drops > 0 && !dropped) {
+        resetChip(e.clientX);
+        bgMusic.play(); // trigger music on first interaction
+      }
     });
 
+    createPegs();
     animate();
   </script>
 </body>
