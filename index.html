@@ -1,52 +1,52 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DankScapers Plinko</title>
   <style>
     body {
       margin: 0;
-      background-color: #000;
+      background: #000;
       overflow: hidden;
-    }
-    #boardBg {
-      position: absolute;
-      width: 100%;
-      height: auto;
-      z-index: 0;
-      user-select: none;
-      pointer-events: none;
+      font-family: sans-serif;
     }
     canvas {
-      position: absolute;
-      z-index: 1;
+      display: block;
+      margin: auto;
+      border: 2px solid #0f0;
+      background: url("board.png") center/cover no-repeat;
     }
     #message {
       position: absolute;
-      top: 20px;
-      width: 100%;
-      text-align: center;
-      font-size: 1.5em;
-      color: #fff68f;
-      z-index: 2;
-      text-shadow: 2px 2px #000;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      color: #0f0;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      border-radius: 8px;
+      z-index: 3;
     }
   </style>
 </head>
 <body>
-  <img id="boardBg" src="board.png" alt="Board Background">
-  <div id="message"></div>
   <canvas id="gameCanvas" width="800" height="1000"></canvas>
+  <div id="message"></div>
   <audio id="bgMusic" src="music.mp3" loop></audio>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const bgMusic = document.getElementById("bgMusic");
+    const message = document.getElementById("message");
 
     const engine = Matter.Engine.create();
     const world = engine.world;
+    engine.gravity.y = 1;
+
     const render = Matter.Render.create({
       canvas: canvas,
       engine: engine,
@@ -61,10 +61,41 @@
     Matter.Render.run(render);
     Matter.Runner.run(Matter.Runner.create(), engine);
 
-    const message = document.getElementById("message");
     let dropsLeft = 3;
+    let totalScore = 0;
+    let highScore = localStorage.getItem("dankPlinkoHighScore") || 0;
 
-    // Board boundaries
+    const scoreDisplay = document.createElement("div");
+    scoreDisplay.style.position = "absolute";
+    scoreDisplay.style.top = "20px";
+    scoreDisplay.style.right = "20px";
+    scoreDisplay.style.background = "rgba(0,0,0,0.7)";
+    scoreDisplay.style.color = "#0f0";
+    scoreDisplay.style.padding = "10px 15px";
+    scoreDisplay.style.fontSize = "1.2em";
+    scoreDisplay.style.borderRadius = "10px";
+    scoreDisplay.style.zIndex = 3;
+    document.body.appendChild(scoreDisplay);
+
+    function updateVisibleScoreboard() {
+      scoreDisplay.textContent = `Score: ${totalScore}M | High: ${highScore}M | Chips Left: ${dropsLeft}`;
+    }
+
+    const replayBtn = document.createElement("button");
+    replayBtn.textContent = "Play Again";
+    replayBtn.style.position = "absolute";
+    replayBtn.style.top = "80px";
+    replayBtn.style.left = "50%";
+    replayBtn.style.transform = "translateX(-50%)";
+    replayBtn.style.padding = "10px 20px";
+    replayBtn.style.fontSize = "1.2em";
+    replayBtn.style.display = "none";
+    replayBtn.style.zIndex = 3;
+    document.body.appendChild(replayBtn);
+    replayBtn.addEventListener("click", () => {
+      window.location.reload();
+    });
+
     const wallOpts = { isStatic: true, render: { visible: false } };
     Matter.World.add(world, [
       Matter.Bodies.rectangle(400, 1000, 800, 40, wallOpts),
@@ -72,7 +103,6 @@
       Matter.Bodies.rectangle(800, 500, 40, 1000, wallOpts),
     ]);
 
-    // Peg layout
     for (let r = 0; r < 9; r++) {
       for (let c = 0; c < 7; c++) {
         const offsetX = (r % 2) * 40;
@@ -90,10 +120,8 @@
     function dropChip(x) {
       if (dropsLeft <= 0) return;
       dropsLeft--;
-
       if (bgMusic.paused) bgMusic.play().catch(() => {});
-
-      let chip = Matter.Bodies.circle(x, 30, 20, {
+      const chip = Matter.Bodies.circle(x, 30, 20, {
         restitution: 0.9,
         label: "chip",
         render: {
@@ -105,6 +133,7 @@
         }
       });
       Matter.World.add(world, chip);
+      updateVisibleScoreboard();
     }
 
     canvas.addEventListener("pointerdown", (e) => {
@@ -113,6 +142,26 @@
       dropChip(x);
     });
 
+    const sizzle = new Audio("sizzle.mp3");
+
+    function updateScoreDisplay(result, points) {
+      totalScore += points;
+      if (points === 0) sizzle.play();
+
+      if (dropsLeft === 0) {
+        if (totalScore > highScore) {
+          highScore = totalScore;
+          localStorage.setItem("dankPlinkoHighScore", highScore);
+        }
+        message.textContent = `${result} | Total Score: ${totalScore}M
+Game Over! High Score: ${highScore}M`;
+        replayBtn.style.display = "block";
+      } else {
+        message.textContent = `${result} | Total Score: ${totalScore}M`;
+      }
+      updateVisibleScoreboard();
+    }
+
     Matter.Events.on(engine, "collisionStart", function(event) {
       event.pairs.forEach(pair => {
         const chip = [pair.bodyA, pair.bodyB].find(b => b.label === "chip");
@@ -120,10 +169,20 @@
         if (chip && floor) {
           const x = chip.position.x;
           let result = "";
-          if (x < 160 || x > 640) result = "You won 10M GP!";
-          else if (x > 320 && x < 480) result = "You won 50M GP!";
-          else result = "Damn, you burned a chip.";
-          message.textContent = result;
+          let points = 0;
+
+          if (x < 160 || x > 640) {
+            result = "You won 10M GP!";
+            points = 10;
+          } else if (x > 320 && x < 480) {
+            result = "You won 50M GP!";
+            points = 50;
+          } else {
+            result = "Damn, you burned a chip!";
+            points = 0;
+          }
+
+          updateScoreDisplay(result, points);
         }
       });
     });
