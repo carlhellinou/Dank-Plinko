@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DankScapers Plinko</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      overflow: hidden;
+    }
+    #boardBg {
+      position: absolute;
+      width: 100%;
+      height: auto;
+      z-index: 0;
+      user-select: none;
+      pointer-events: none;
+    }
+    canvas {
+      position: absolute;
+      z-index: 1;
+    }
+    #message {
+      position: absolute;
+      top: 20px;
+      width: 100%;
+      text-align: center;
+      font-size: 1.5em;
+      color: #fff68f;
+      z-index: 2;
+      text-shadow: 2px 2px #000;
+    }
+  </style>
+</head>
+<body>
+  <img id="boardBg" src="board.png" alt="Board Background">
+  <div id="message"></div>
+  <canvas id="gameCanvas" width="800" height="1000"></canvas>
+  <audio id="bgMusic" src="music.mp3" loop></audio>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const bgMusic = document.getElementById("bgMusic");
+
+    const engine = Matter.Engine.create();
+    const world = engine.world;
+    const render = Matter.Render.create({
+      canvas: canvas,
+      engine: engine,
+      options: {
+        width: 800,
+        height: 1000,
+        wireframes: false,
+        background: 'transparent'
+      }
+    });
+
+    Matter.Render.run(render);
+    Matter.Runner.run(Matter.Runner.create(), engine);
+
+    const message = document.getElementById("message");
+    let dropsLeft = 3;
+
+    // Board boundaries
+    const wallOpts = { isStatic: true, render: { visible: false } };
+    Matter.World.add(world, [
+      Matter.Bodies.rectangle(400, 1000, 800, 40, wallOpts),
+      Matter.Bodies.rectangle(0, 500, 40, 1000, wallOpts),
+      Matter.Bodies.rectangle(800, 500, 40, 1000, wallOpts),
+    ]);
+
+    // Peg layout
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 7; c++) {
+        const offsetX = (r % 2) * 40;
+        let x = 100 + c * 80 + offsetX;
+        let y = 150 + r * 80;
+        let peg = Matter.Bodies.circle(x, y, 10, {
+          isStatic: true,
+          restitution: 0.8,
+          render: { visible: false }
+        });
+        Matter.World.add(world, peg);
+      }
+    }
+
+    function dropChip(x) {
+      if (dropsLeft <= 0) return;
+      dropsLeft--;
+
+      if (bgMusic.paused) bgMusic.play().catch(() => {});
+
+      let chip = Matter.Bodies.circle(x, 30, 20, {
+        restitution: 0.9,
+        label: "chip",
+        render: {
+          sprite: {
+            texture: "chip.png",
+            xScale: 0.1,
+            yScale: 0.1
+          }
+        }
+      });
+      Matter.World.add(world, chip);
+    }
+
+    canvas.addEventListener("pointerdown", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      dropChip(x);
+    });
+
+    Matter.Events.on(engine, "collisionStart", function(event) {
+      event.pairs.forEach(pair => {
+        const chip = [pair.bodyA, pair.bodyB].find(b => b.label === "chip");
+        const floor = [pair.bodyA, pair.bodyB].find(b => b.position.y > 950);
+        if (chip && floor) {
+          const x = chip.position.x;
+          let result = "";
+          if (x < 160 || x > 640) result = "You won 10M GP!";
+          else if (x > 320 && x < 480) result = "You won 50M GP!";
+          else result = "Damn, you burned a chip.";
+          message.textContent = result;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
