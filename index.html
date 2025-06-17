@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DankScapers Plinko</title>
+  <title>DankScapers Plinko (Debug Mode)</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -21,18 +21,24 @@
       margin-top: 20px;
       background: url('Dank plinko board with background.png') no-repeat center;
       background-size: contain;
+      border: 2px solid #0f0;
     }
     .info {
       text-align: center;
       margin-top: 10px;
     }
+    #debug {
+      color: #0f0;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
-  <h1>DankScapers Plinko</h1>
+  <h1>DankScapers Plinko (Debug Mode)</h1>
   <div class="info">
     <p>Drops left: <span id="dropsLeft">3</span></p>
     <p>Total GP: <span id="score">0</span></p>
+    <p id="debug">Debug: Awaiting user click...</p>
   </div>
   <canvas id="gameCanvas" width="800" height="600"></canvas>
   <audio id="bgMusic" loop>
@@ -45,6 +51,7 @@
     const chipImg = new Image();
     chipImg.src = "dankplinkochip.png";
     const bgMusic = document.getElementById("bgMusic");
+    const debug = document.getElementById("debug");
 
     let chipX = canvas.width / 2, chipY = 0;
     let vX = 0, vY = 0, gravity = 0.5, bounce = 0.6;
@@ -67,7 +74,7 @@
     }
 
     function drawPegs() {
-      ctx.fillStyle = "rgba(0,255,0,0.2)";
+      ctx.fillStyle = "rgba(0,255,0,0.5)";
       for (let peg of pegs) {
         ctx.beginPath();
         ctx.arc(peg.x, peg.y, peg.radius, 0, Math.PI * 2);
@@ -86,6 +93,8 @@
           let pushY = Math.sin(angle) * 2;
           vX += pushX;
           vY += pushY;
+          console.log("Collision with peg at", peg.x, peg.y);
+          debug.textContent = `Collision at peg (${peg.x}, ${peg.y})`;
         }
       }
     }
@@ -155,7 +164,13 @@
     canvas.addEventListener("click", (e) => {
       if (drops > 0 && !dropped) {
         resetChip(e.clientX);
-        bgMusic.play(); // trigger music on first interaction
+        bgMusic.volume = 0.2;
+        bgMusic.play().then(() => {
+          debug.textContent = "Music playing 🎵";
+        }).catch(err => {
+          console.error("Music play error:", err);
+          debug.textContent = "Music play failed ❌";
+        });
       }
     });
 
