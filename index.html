@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DankScapers Plinko</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #111;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+    }
+    canvas {
+      margin-top: 20px;
+      background: url('Dank plinko board with background.png') no-repeat center;
+      background-size: contain;
+    }
+    .info {
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>DankScapers Plinko</h1>
+  <div class="info">
+    <p>Drops left: <span id="dropsLeft">3</span></p>
+    <p>Total GP: <span id="score">0</span></p>
+  </div>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <audio autoplay loop>
+    <source src="High_Empire_compressed.mp3" type="audio/mpeg">
+    Your browser does not support the audio tag.
+  </audio>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const chipImg = new Image();
+    chipImg.src = "dankplinkochip.png";
+
+    let chipX = canvas.width / 2, chipY = 0;
+    let vX = 0, vY = 0, gravity = 0.5, bounce = 0.6;
+    let drops = 3, score = 0, dropped = false;
+
+    const dropsLeftDisplay = document.getElementById("dropsLeft");
+    const scoreDisplay = document.getElementById("score");
+
+    function resetChip(x) {
+      chipX = x - canvas.offsetLeft - 20;
+      chipY = 0;
+      vX = (Math.random() - 0.5) * 4;
+      vY = 0;
+      dropped = true;
+    }
+
+    function updatePhysics() {
+      if (!dropped) return;
+      vY += gravity;
+      chipY += vY;
+      chipX += vX;
+
+      if (chipY + 40 > canvas.height) {
+        chipY = canvas.height - 40;
+        vY *= -bounce;
+
+        dropped = false;
+        evaluatePrize(chipX);
+      }
+      if (chipX + 40 > canvas.width || chipX < 0) {
+        vX *= -bounce;
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(chipImg, chipX, chipY, 40, 40);
+    }
+
+    function evaluatePrize(x) {
+      const slotWidth = canvas.width / 5;
+      const index = Math.floor(x / slotWidth);
+      let message = "";
+      if (index === 0 || index === 4) {
+        score += 10000000;
+        message = "You won 10M GP!";
+      } else if (index === 2) {
+        score += 50000000;
+        message = "You won 50M GP!";
+      } else {
+        message = "Damn, you burned a chip.";
+      }
+      alert(message);
+      drops--;
+      updateDisplay();
+    }
+
+    function updateDisplay() {
+      dropsLeftDisplay.textContent = drops;
+      scoreDisplay.textContent = score.toLocaleString();
+    }
+
+    function animate() {
+      draw();
+      updatePhysics();
+      requestAnimationFrame(animate);
+    }
+
+    canvas.addEventListener("click", (e) => {
+      if (drops > 0 && !dropped) resetChip(e.clientX);
+    });
+
+    animate();
+  </script>
+</body>
+</html>
