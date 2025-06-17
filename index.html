@@ -24,7 +24,7 @@
     .chip {
       width: 40px;
       position: absolute;
-      top: 140px;
+      top: 160px;
       left: 180px;
       z-index: 10;
       transition: top 0.3s ease, left 0.3s ease;
@@ -95,7 +95,6 @@
       const yClick = e.clientY - boardRect.top;
       const xClick = e.clientX - boardRect.left;
 
-      // Only allow click in upper middle area
       if (yClick > 100 || xClick < 60 || xClick > 340) return;
 
       let x = xClick - 20;
@@ -104,13 +103,13 @@
       chip.style.left = x + "px";
       chip.style.top = y + "px";
 
-      let steps = 10; // slower and more realistic
+      let steps = 10;
       let count = 0;
 
       const interval = setInterval(() => {
         if (count >= steps) {
           clearInterval(interval);
-          const slotIndex = Math.min(4, Math.floor((x - 20) / 72)); // 5 slots logic
+          const slotIndex = Math.min(4, Math.floor((x - 20) / 72));
           document.getElementById("result").innerHTML = `🎉 You landed on: <b>${prizes[slotIndex]}</b>`;
         } else {
           const smoke = document.createElement("div");
