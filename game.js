@@ -121,3 +121,15 @@ Matter.Events.on(engine, "collisionStart", function(event) {
     }
   });
 });
+
+const render = Matter.Render.create({
+  canvas: canvas,
+  engine: engine,
+  options: {
+    width: canvas.width,
+    height: canvas.height,
+    wireframes: false,
+    background: "clear"
+  }
+});
+Matter.Render.run(render);
